@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - Controle por Gestos</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #101820;
+            color: #fff;
+        }
+
+        .topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 28px;
+            background: #1f2937;
+            border-bottom: 2px solid #374151;
+        }
+
+        .topo h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .topo a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .conteudo {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .painel {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .painel h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #38bdf8;
+            padding-bottom: 10px;
+        }
+
+        .webcam {
+            width: 100%;
+            border: 4px solid #38bdf8;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .maquina {
+            width: 180px;
+            height: 180px;
+            margin: 20px auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            border: 6px solid #64748b;
+            background: #374151;
+            transition: all 0.3s ease;
+        }
+
+        .maquina.ligada {
+            background: #22c55e;
+            border-color: #86efac;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
+        }
+
+        .maquina.desligada {
+            background: #ef4444;
+            border-color: #fca5a5;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .info {
+            text-align: center;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #374151;
+            text-align: left;
+        }
+
+        th {
+            color: #38bdf8;
+        }
+
+        .print-miniatura {
+            width: 90px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #38bdf8;
+            cursor: pointer;
+        }
+
+        .ultimo-print {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .ultimo-print img {
+            max-width: 100%;
+            max-height: 220px;
+            width: auto;
+            margin-top: 10px;
+        }
+
+        .sem-print {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .acoes-prints {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .acoes-prints span {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .btn-apagar-todos {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #ef4444;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-apagar-todos:hover {
+            background: #dc2626;
+        }
+
+        .celula-print {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-apagar-print {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            background: #7f1d1d;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-apagar-print:hover {
+            background: #ef4444;
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+
+        #easter-egg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(120, 0, 0, 0.92);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 24px;
+            animation: piscar-fundo 0.15s infinite alternate;
+        }
+
+        #easter-egg.ativo {
+            display: flex;
+        }
+
+        #easter-egg .caixa {
+            background: #000;
+            border: 8px solid #ff0000;
+            border-radius: 16px;
+            padding: 40px 30px;
+            max-width: 90vw;
+            box-shadow: 0 0 80px #ff0000, 0 0 120px #ff6600;
+            transform: translateY(40px) scale(0.7);
+            opacity: 0;
+        }
+
+        #easter-egg.ativo .caixa {
+            animation: tremer 0.08s 0.55s infinite;
+        }
+
+        #easter-egg.ativo .caixa.pulando {
+            animation: pular 0.55s ease-out forwards, tremer 0.08s 0.55s infinite;
+        }
+
+        #easter-egg h1 {
+            margin: 0;
+            font-size: clamp(28px, 6vw, 64px);
+            color: #ff2222;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff6600;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        #easter-egg p {
+            margin: 20px 0 0;
+            font-size: clamp(18px, 3vw, 28px);
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #easter-egg button {
+            margin-top: 28px;
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background: #ff2222;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        @keyframes tremer {
+            0% { transform: translate(2px, -2px) rotate(-1deg); }
+            50% { transform: translate(-3px, 3px) rotate(1deg); }
+            100% { transform: translate(3px, 1px) rotate(-2deg); }
+        }
+
+        @keyframes pular {
+            0% {
+                transform: translateY(60px) scale(0.65);
+                opacity: 0;
+            }
+            45% {
+                transform: translateY(-28px) scale(1.08);
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(12px) scale(0.96);
+            }
+            85% {
+                transform: translateY(-10px) scale(1.03);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes piscar-fundo {
+            from { background: rgba(120, 0, 0, 0.92); }
+            to { background: rgba(40, 0, 0, 0.98); }
+        }
+
+        body.easter-egg-ativo {
+            overflow: hidden;
+        }
+
+        @media (max-width: 900px) {
+            .conteudo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="popup"></div>
+
+    <div id="easter-egg">
+        <div class="caixa">
+            <h1>VAI SE FODER VOCE CUPINXA</h1>
+            <p>ALERTA CATASTROFICO DETECTADO</p>
+            <button type="button" onclick="fecharEasterEgg()">OK, DESCULPA</button>
+        </div>
+    </div>
+
+    <header class="topo">
+        <h1>Ola, {{ usuario }}</h1>
+        <a href="/logout">Sair</a>
+    </header>
+
+    <main class="conteudo">
+        <section class="painel">
+            <h2>Webcam</h2>
+            <img class="webcam" src="/video_feed" alt="Imagem da webcam">
+            <p class="info">
+                Joinha = ligar a maquina<br>
+                Hang loose = desligar a maquina<br><br>
+                <strong>Dicas:</strong><br>
+                - Deixe a palma da mao virada para a camera<br>
+                - No joinha, so o polegar fica esticado<br>
+                - No hang loose, polegar e mindinho esticados<br>
+                - Se aparecerem pontos verdes na mao, a deteccao esta funcionando
+            </p>
+        </section>
+
+        <section class="painel">
+            <h2>Maquina Simulada</h2>
+            <div id="maquina" class="maquina desligada">DESLIGADA</div>
+            <p class="info">Gesto atual: <strong id="gesto-atual">nenhum</strong></p>
+
+            <h2>Historico</h2>
+            <div class="acoes-prints">
+                <span>Gerenciar prints salvos</span>
+                <button type="button" class="btn-apagar-todos" onclick="apagarTodosPrints()">
+                    Apagar todos
+                </button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Horario</th>
+                        <th>Gesto</th>
+                        <th>Estado</th>
+                        <th>Print</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-historico">
+                    <tr>
+                        <td colspan="5">Nenhuma acao registrada ainda.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="ultimo-print">
+                <h2>Ultimo Print da Webcam</h2>
+                <p id="sem-print" class="sem-print">Nenhum print salvo ainda.</p>
+                <img id="ultimo-print" src="" alt="Ultimo print da webcam" style="display: none;">
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let ultimoEstado = null;
+        let ultimoEasterEgg = 0;
+        let easterEggJaViu = false;
+        let easterEggTimer = null;
+        let easterEggAgendado = false;
+        let popupTimer = null;
+        let historicoCache = "";
+        let totalHistoricoCache = 0;
+        const DELAY_EASTER_EGG_MS = 400;
+
+        function mostrarPopup(mensagem) {
+            const popup = document.getElementById("popup");
+            popup.textContent = mensagem;
+            popup.style.display = "block";
+
+            if (popupTimer) {
+                clearTimeout(popupTimer);
+            }
+
+            popupTimer = setTimeout(() => {
+                popup.style.display = "none";
+                popupTimer = null;
+            }, 2000);
+        }
+
+        function mostrarEasterEgg() {
+            if (easterEggAgendado || document.getElementById("easter-egg").classList.contains("ativo")) {
+                return;
+            }
+
+            easterEggAgendado = true;
+
+            easterEggTimer = setTimeout(() => {
+                const easterEgg = document.getElementById("easter-egg");
+                const caixa = easterEgg.querySelector(".caixa");
+
+                easterEgg.classList.add("ativo");
+                document.body.classList.add("easter-egg-ativo");
+
+                caixa.classList.remove("pulando");
+                void caixa.offsetWidth;
+                caixa.classList.add("pulando");
+
+                easterEggAgendado = false;
+                easterEggTimer = null;
+            }, DELAY_EASTER_EGG_MS);
+        }
+
+        function fecharEasterEgg() {
+            if (easterEggTimer) {
+                clearTimeout(easterEggTimer);
+                easterEggTimer = null;
+            }
+
+            easterEggAgendado = false;
+
+            const easterEgg = document.getElementById("easter-egg");
+            const caixa = easterEgg.querySelector(".caixa");
+
+            easterEgg.classList.remove("ativo");
+            document.body.classList.remove("easter-egg-ativo");
+            caixa.classList.remove("pulando");
+        }
+
+        function atualizarMaquina(ligada) {
+            const maquina = document.getElementById("maquina");
+            maquina.className = ligada ? "maquina ligada" : "maquina desligada";
+            maquina.textContent = ligada ? "LIGADA" : "DESLIGADA";
+        }
+
+        function atualizarHistorico(registros) {
+            const tabela = document.getElementById("tabela-historico");
+            const ultimoPrint = document.getElementById("ultimo-print");
+            const semPrint = document.getElementById("sem-print");
+
+            if (!registros.length) {
+                tabela.innerHTML = '<tr><td colspan="5">Nenhuma acao registrada ainda.</td></tr>';
+                ultimoPrint.style.display = "none";
+                semPrint.style.display = "block";
+                return;
+            }
+
+            tabela.innerHTML = registros.map((item) => `
+                <tr>
+                    <td>${item.usuario}</td>
+                    <td>${item.horario}</td>
+                    <td>${item.gesto}</td>
+                    <td>${item.estado_maquina}</td>
+                    <td>
+                        <div class="celula-print">
+                            <img
+                                class="print-miniatura"
+                                src="/prints/${item.print}?t=${Date.now()}"
+                                alt="Print da acao"
+                                onclick="window.open('/prints/${item.print}', '_blank')"
+                            >
+                            <button
+                                type="button"
+                                class="btn-apagar-print"
+                                onclick="apagarPrint('${item.print}')"
+                            >
+                                Apagar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+
+            const maisRecente = registros.find((item) => item.print);
+
+            if (maisRecente && maisRecente.print) {
+                ultimoPrint.src = `/prints/${maisRecente.print}?t=${Date.now()}`;
+                ultimoPrint.style.display = "block";
+                semPrint.style.display = "none";
+            } else {
+                ultimoPrint.style.display = "none";
+                ultimoPrint.src = "";
+                semPrint.style.display = "block";
+            }
+        }
+
+        async function apagarPrint(nomeArquivo) {
+            if (!confirm("Apagar este print?")) {
+                return;
+            }
+
+            const resposta = await fetch(`/prints/${encodeURIComponent(nomeArquivo)}`, {
+                method: "DELETE",
+            });
+
+            if (!resposta.ok) {
+                mostrarPopup("Nao foi possivel apagar o print.");
+                return;
+            }
+
+            mostrarPopup("Print apagado com sucesso.");
+            historicoCache = "";
+            totalHistoricoCache = -1;
+            await atualizarPainel();
+        }
+
+        async function apagarTodosPrints() {
+            if (!confirm("Apagar TODOS os prints e limpar o historico?")) {
+                return;
+            }
+
+            const resposta = await fetch("/prints", {
+                method: "DELETE",
+            });
+
+            if (!resposta.ok) {
+                mostrarPopup("Nao foi possivel apagar os prints.");
+                return;
+            }
+
+            mostrarPopup("Todos os prints foram apagados.");
+            historicoCache = "";
+            totalHistoricoCache = -1;
+            await atualizarPainel();
+        }
+
+        async function atualizarPainel() {
+            const respostaStatus = await fetch("/status");
+            const status = await respostaStatus.json();
+
+            document.getElementById("gesto-atual").textContent = status.gesto;
+            atualizarMaquina(status.maquina_ligada);
+
+            if (status.easter_egg_contador > ultimoEasterEgg) {
+                mostrarEasterEgg();
+                ultimoEasterEgg = status.easter_egg_contador;
+                easterEggJaViu = true;
+            } else if (status.easter_egg_ativo && !easterEggJaViu && !easterEggAgendado) {
+                mostrarEasterEgg();
+                easterEggJaViu = true;
+            }
+
+            if (!status.easter_egg_ativo) {
+                easterEggJaViu = false;
+            }
+
+            if (ultimoEstado !== null && ultimoEstado !== status.maquina_ligada) {
+                const mensagem = status.maquina_ligada
+                    ? "Maquina ligada! Print da webcam salvo."
+                    : "Maquina desligada! Print da webcam salvo.";
+                mostrarPopup(mensagem);
+            }
+
+            ultimoEstado = status.maquina_ligada;
+
+            if (status.total_historico !== totalHistoricoCache) {
+                const respostaHistorico = await fetch("/historico");
+                const dadosHistorico = await respostaHistorico.json();
+                const historicoJson = JSON.stringify(dadosHistorico.historico);
+
+                if (historicoJson !== historicoCache) {
+                    atualizarHistorico(dadosHistorico.historico);
+                    historicoCache = historicoJson;
+                }
+
+                totalHistoricoCache = status.total_historico;
+            }
+        }
+
+        setInterval(atualizarPainel, 300);
+        atualizarPainel();
+    </script>
+</body>
+</html>

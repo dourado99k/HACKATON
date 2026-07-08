@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Controle por Gestos</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: #101820;
+            color: #fff;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        p {
+            margin: 0 0 24px;
+            color: #cbd5e1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #374151;
+            border-radius: 8px;
+            background: #111827;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: #0f172a;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Controle por Gestos</h1>
+        <p>Informe seu nome para acessar o painel da maquina.</p>
+
+        <form method="post" action="/login">
+            <label for="nome">Nome</label>
+            <input id="nome" name="nome" type="text" placeholder="Digite seu nome" required minlength="1" autofocus>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>
